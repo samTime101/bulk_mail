@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>send bulk emails</title>
+</head>
+<body>
+    <h1>June 2, 2025 samipregmi</h1>
+    <p>Project code heavily used from https://github.com/samTime101/RemoteSave/</p>
+    <!-- <i></i> -->
+    <p>Pre requisites</p>
+    <ul>
+        <li>Your gmail account must have 2FA</li>
+        <li>setup the app password for gmail [!!! important ] https://myaccount.google.com/apppasswords</li>
+        <li>app passwords can only be setup when u have 2fa enabled</li>
+    </ul>
+    <p>How to use</p>
+    <ul>
+        <li>sender email and password is not saved anywhere</li>
+        <li>for sending to multiple users use commas eg: <i>abc@gmail.com,def@gmail.com</i> with no whitespaces</li>
+    </ul>
+    <h1>Send Bulk Emails</h1>
+    sender_mail
+    <input type="email" name="sender_mail" id="sender_mail">
+    <br>
+    sender_password
+    <input type="password" name="sender_password" id="sender_password">
+    <br>
+    receivers mail
+    <input type="text" id="receivers" placeholder="if more than one please use comma">
+    <br>
+    receivers cc
+    <input type="text" id="email_cc" placeholder="if more than one please use comma">
+    <br>
+    files [optional]
+    <input type="file" name="attachments" id="attachments">
+    <br>
+    email subject
+    <input type="text" name="email_subject" id="email_subject" placeholder="Enter email subject">
+    <br>
+    email content
+    <textarea id="email_content" placeholder="Enter email content"></textarea>
+    <br>
+    <button id="send_email">Send Emails</button>
+    <div id="status_msg"></div>
+</body>
+<script>
+    // JUNE 2 , 2025 
+    // samipregmi
+    let send_email = document.getElementById("send_email");
+    let status_msg = document.getElementById("status_msg");
+
+    send_email.addEventListener("click", async () => {
+        let receivers = document.getElementById("receivers").value;
+        let email_cc = document.getElementById("email_cc").value;
+        let sender_mail = document.getElementById("sender_mail").value;
+        let sender_password = document.getElementById("sender_password").value;
+        let email_subject = document.getElementById("email_subject").value;
+        let email_content = document.getElementById("email_content").value;
+        let attachments = document.getElementById("attachments").files[0];
+
+
+        let emails = [];
+        if (receivers) {
+            let emailArray = receivers.split(",");
+            for (let i = 0; i < emailArray.length; i++) {
+            let trimmedEmail = emailArray[i].trim();
+            if (trimmedEmail) {
+                emails.push(trimmedEmail);
+            }
+            }
+        }
+
+        let ccEmails = [];
+        if (email_cc) {
+            let ccArray = email_cc.split(",");
+            for (let i = 0; i < ccArray.length; i++) {
+            let trimmedCC = ccArray[i].trim();
+            if (trimmedCC) {
+                ccEmails.push(trimmedCC);
+            }
+            }
+        }
+
+        if (!emails.length || !sender_mail || !sender_password || !email_subject || !email_content) {
+            status_msg.textContent = "empty fields";
+            return;
+        }
+        //https://github.com/samTime101/RemoteSave/blob/main/js/see.js
+        //https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest_API/Using_FormData_Objects
+ let formData = new FormData();
+    formData.append("sender_email", sender_mail);
+    formData.append("sender_pass", sender_password);
+    formData.append("subject", email_subject);
+    formData.append("contents", email_content);
+    formData.append("receivers", JSON.stringify(emails));
+    formData.append("cc", JSON.stringify(ccEmails));
+    if (attachments) {
+        formData.append("attachment", attachments);
+    }
+
+    try {
+        const response = await fetch("https://samipregmi101.pythonanywhere.com/", {
+            method: "POST",
+            body: formData
+        });
+        const result = await response.text();
+        status_msg.textContent =  "Email sent.";
+    } catch (error) {
+        console.error(error);
+        status_msg.textContent = "Failed to send email.";
+    }        
+    })
+</script>
+</html> 
